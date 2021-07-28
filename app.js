@@ -1,5 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -24,4 +26,15 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occured" });
 });
 
-app.listen(5000);
+mongoose
+  .connect(
+    "mongodb+srv://admin:admin@cluster0.lclrz.mongodb.net/places?retryWrites=true&w=majority",
+    { useNewUrlParser: true },
+    { useUnifiedTopology: true }
+  )
+  .then(() => {
+    app.listen(5000);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
