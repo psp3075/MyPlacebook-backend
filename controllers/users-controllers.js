@@ -1,17 +1,7 @@
-const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
-
-const DUMMY_USERS = [
-  {
-    id: "u1",
-    name: "imaginary",
-    email: "test@test.com",
-    password: "123456",
-  },
-];
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -26,13 +16,14 @@ const getUsers = async (req, res, next) => {
 
 const signup = async (req, res, next) => {
   const errors = validationResult(req);
+  console.log(errors);
   if (!errors.isEmpty()) {
     return next(
       new HttpError("inputs are not valid,please check your data", 422)
     );
   }
-  const { username, email, password } = req.body;
-  //   console.log(req.body);
+  const { name, email, password } = req.body;
+  //console.log(req.body);
   let existingUser;
   try {
     existingUser = await User.findOne({ email: email });
@@ -50,10 +41,9 @@ const signup = async (req, res, next) => {
   }
 
   const createdUser = new User({
-    username,
+    name,
     email,
-    image:
-      "https://cdn2.iconfinder.com/data/icons/avatars-99/62/avatar-370-456322-512.png",
+    image: req.file.path,
     password,
     places: [],
   });
@@ -85,7 +75,10 @@ const login = async (req, res, next) => {
     const error = new HttpError("Invalid credentials", 401);
     return next(error);
   }
-  res.json({ message: "Logged in" });
+  res.json({
+    message: "Logged in",
+    user: existingUser.toObject({ getters: true }),
+  });
 };
 
 exports.getUsers = getUsers;
